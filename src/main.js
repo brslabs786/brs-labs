@@ -38,10 +38,10 @@ document.addEventListener('DOMContentLoaded', () => {
   // Listen for scroll
   window.addEventListener('scroll', revealOnScroll);
 
-  // Form Submission Mock
+  // Form Submission handling with Formspree
   const form = document.querySelector('.contact-form');
   if (form) {
-    form.addEventListener('submit', (e) => {
+    form.addEventListener('submit', async (e) => {
       e.preventDefault();
       const btn = form.querySelector('button');
       const originalText = btn.textContent;
@@ -49,18 +49,35 @@ document.addEventListener('DOMContentLoaded', () => {
       btn.textContent = 'Sending...';
       btn.disabled = true;
       
-      // Simulate API call
-      setTimeout(() => {
-        btn.textContent = 'Message Sent!';
-        btn.style.background = 'linear-gradient(45deg, #00ff88, #00b8ff)';
-        form.reset();
+      const formData = new FormData(form);
+      
+      try {
+        const response = await fetch(form.action, {
+          method: form.method,
+          body: formData,
+          headers: {
+            'Accept': 'application/json'
+          }
+        });
         
-        setTimeout(() => {
-          btn.textContent = originalText;
-          btn.disabled = false;
-          btn.style.background = '';
-        }, 3000);
-      }, 1500);
+        if (response.ok) {
+          btn.textContent = 'Message Sent!';
+          btn.style.background = 'linear-gradient(45deg, #00ff88, #00b8ff)';
+          form.reset();
+        } else {
+          btn.textContent = 'Error sending!';
+          btn.style.background = 'linear-gradient(45deg, #ff0055, #ff5500)';
+        }
+      } catch (error) {
+        btn.textContent = 'Error sending!';
+        btn.style.background = 'linear-gradient(45deg, #ff0055, #ff5500)';
+      }
+      
+      setTimeout(() => {
+        btn.textContent = originalText;
+        btn.disabled = false;
+        btn.style.background = '';
+      }, 3000);
     });
   }
 });
